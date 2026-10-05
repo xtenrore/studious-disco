@@ -5,7 +5,7 @@ if [ -n "${BROWSERBASE_API_KEY:-}" ]; then
   if [ -z "${BROWSERBASE_PROJECT_ID:-}" ]; then
     export BROWSERBASE_PROJECT_ID="$(node /app/scripts/browserbase-project.js)"
   fi
-  agy mcp add --env "BROWSERBASE_PROJECT_ID=${BROWSERBASE_PROJECT_ID}" browserbase /usr/local/bin/mcp-server-browserbase
+  agy mcp add --env "BROWSERBASE_PROJECT_ID=${BROWSERBASE_PROJECT_ID}" browserbase /usr/local/bin/node /app/scripts/browserbase-mcp.js
 else
   echo 'Browserbase skipped: set BROWSERBASE_API_KEY first.'
 fi

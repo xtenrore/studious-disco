@@ -8,4 +8,14 @@ Verified on 2026-10-05:
 - Workspace Docker image built successfully with official AGY, Railway CLI and Browserbase MCP.
 - Reference screenshots are in `docs/screenshots/`.
 
-These checks use isolated local services and test credentials. WebKit emulation is not a physical iPhone. `mobile-testing.md` tracks physical-iOS and authenticated AGY/Browserbase acceptance checks that require the owner’s device and provider login.
+Local integration checks use isolated services and test credentials. WebKit emulation is not a physical iPhone. `mobile-testing.md` tracks physical-iOS and authenticated AGY/Browserbase acceptance checks that require the owner’s device and provider login.
+
+Production deployment verified on 2026-10-05 at https://web-production-66e90.up.railway.app:
+
+- Both Railway services reached SUCCESS via authenticated Railway CLI uploads of GitHub source ZIPs.
+- HTTPS health, chosen-password login, Secure/HttpOnly/SameSite cookie, private API, authenticated terminal output, logout revocation and installed AGY checks passed.
+- Workspace home is `/home/agy` on the persistent volume; the workspace has no public domain.
+- The shared Browserbase API key resolves its project and the Browser API responds successfully.
+- Browserbase MCP uses direct Playwright operations over managed-browser CDP with no additional model credentials.
+
+AGY has not been started automatically or during production verification. Provider authentication and physical iPhone acceptance remain owner-run checks.

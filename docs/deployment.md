@@ -12,7 +12,7 @@ Create a private project with two services from `xtenrore/studious-disco`, branc
 - Sleeping/serverless: disabled. No cron schedule.
 - Healthcheck: `/health`, checks daemon reachability only.
 - Variables: WORKSPACE_TOKEN (32+ random characters), PORT=3001.
-- Optional: BROWSERBASE_API_KEY, BROWSERBASE_PROJECT_ID, GEMINI_API_KEY (official Browserbase tool requirement), GITHUB_TOKEN, RAILWAY_API_TOKEN or supported Railway authentication.
+- Optional: BROWSERBASE_API_KEY, BROWSERBASE_PROJECT_ID, BROWSERBASE_CONTEXT_ID (optional persistent browser context), GITHUB_TOKEN, RAILWAY_API_TOKEN or supported Railway authentication.
 
 ## Web
 

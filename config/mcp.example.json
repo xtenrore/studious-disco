@@ -1,7 +1,27 @@
 {
   "mcpServers": {
-    "browserbase": {"command": "mcp-server-browserbase", "args": [], "env": {"BROWSERBASE_API_KEY": "SET_IN_RAILWAY", "BROWSERBASE_PROJECT_ID": "SET_IN_RAILWAY", "GEMINI_API_KEY": "SET_IF_REQUIRED_BY_BROWSERBASE_TOOLS"}},
-    "github": {"serverUrl": "https://api.githubcopilot.com/mcp/", "headers": {"Authorization": "Bearer SET_GITHUB_TOKEN"}},
-    "railway": {"command": "railway", "args": ["mcp"]}
+    "browserbase": {
+      "command": "node",
+      "args": [
+        "/app/scripts/browserbase-mcp.js"
+      ],
+      "env": {
+        "BROWSERBASE_API_KEY": "SET_IN_RAILWAY",
+        "BROWSERBASE_PROJECT_ID": "OPTIONAL_IF_ONE_PROJECT",
+        "BROWSERBASE_CONTEXT_ID": "OPTIONAL_PERSISTENT_CONTEXT"
+      }
+    },
+    "github": {
+      "serverUrl": "https://api.githubcopilot.com/mcp/",
+      "headers": {
+        "Authorization": "Bearer SET_GITHUB_TOKEN"
+      }
+    },
+    "railway": {
+      "command": "railway",
+      "args": [
+        "mcp"
+      ]
+    }
   }
 }

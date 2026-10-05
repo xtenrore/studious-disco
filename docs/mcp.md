@@ -6,13 +6,11 @@ The script uses AGY's supported `agy mcp add` command, which writes native AGY c
 
 ## Browserbase
 
-The installed package is `@browserbasehq/mcp-server-browserbase@2.4.3`. It connects to **managed** cloud Chromium, not an application-hosted browser. Some official MCP page-action tools use Stagehand and require GEMINI_API_KEY; this is Browserbase's tool implementation, not an agent supervisor or provider fallback. The app itself never calls a model API. Review the provider's package documentation for supported tools and key requirements.
+The installed package is Microsoft's `@playwright/mcp@0.0.83`. The Browserbase launcher creates a managed cloud browser and connects Playwright MCP over CDP. Navigation, clicks, typing, snapshots and screenshots are direct browser operations. Only BROWSERBASE_API_KEY is required; no Gemini key or second AI agent is used. Local browser binaries are not installed.
 
-Set BROWSERBASE_API_KEY on workspace. If the key has exactly one project, the app and explicit setup script discover its ID automatically. Otherwise set BROWSERBASE_PROJECT_ID to select a project. For persistent browser login contexts, create a context in Browserbase and explicitly configure it:
+Set BROWSERBASE_API_KEY on workspace. If the key has exactly one project, the app and explicit setup script discover its ID automatically. Otherwise set BROWSERBASE_PROJECT_ID to select a project. For persistent browser login state, create a context in Browserbase, set BROWSERBASE_CONTEXT_ID in Railway, and run `configure-agy-mcp` again. The launcher uses that context with persistence enabled.
 
-```sh
-agy mcp add browserbase /usr/local/bin/mcp-server-browserbase --contextId YOUR_CONTEXT_ID --persist
-```
+A remote session is created when AGY starts the registered MCP process and released when that process exits. Browserbase's own timeout applies if the process is interrupted abruptly. This never launches or restarts AGY.
 
 Browserbase API lists active sessions for your project; the app exposes these in Browser. Logging in manually, 2FA and CAPTCHA are performed directly in the provider's live view. Do not assume watch/takeover controls communicate with AGY. Tell it when you want it to pause or resume.
 
@@ -30,7 +28,8 @@ The official endpoint is `https://api.githubcopilot.com/mcp/`. Set GITHUB_TOKEN 
 
 - Official AGY CLI: https://antigravity.google/product/antigravity-cli/
 - Official installer: https://antigravity.google/cli/install.sh
-- Browserbase MCP: https://github.com/browserbase/mcp-server-browserbase
+- Playwright MCP: https://github.com/microsoft/playwright-mcp
+- Browserbase sessions: https://docs.browserbase.com/reference/api/create-a-session
 - Browserbase contexts: https://docs.browserbase.com/features/contexts
 - GitHub MCP: https://github.com/github/github-mcp-server
 - Railway MCP: https://docs.railway.com/reference/mcp-server

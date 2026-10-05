@@ -13,3 +13,11 @@ test('Browserbase refuses ambiguous projects and untrusted live-view hosts',asyn
   process.env.BROWSERBASE_PROJECT_ID='project';globalThis.fetch=async url=>({ok:true,json:async()=>url.endsWith('/sessions')?[{id:'active',projectId:'project',status:'RUNNING'}]:{debuggerFullscreenUrl:'https://browserbase.com.evil.example/live'}});const unsafe=await import('../apps/workspace/browser.js?test=unsafe');await assert.rejects(unsafe.browserSessions(),/Invalid live view/);
  }finally{globalThis.fetch=original;if(oldKey===undefined)delete process.env.BROWSERBASE_API_KEY;else process.env.BROWSERBASE_API_KEY=oldKey;if(oldProject===undefined)delete process.env.BROWSERBASE_PROJECT_ID;else process.env.BROWSERBASE_PROJECT_ID=oldProject;}
 });
+test('managed-browser launcher requires only the Browserbase key and preserves an optional context',async()=>{
+ const {createRemoteSession}=await import('../scripts/browserbase-mcp.js');let body;
+ const request=async(url,options)=>{assert.equal(url,'https://api.browserbase.com/v1/sessions');assert.equal(options.headers['x-bb-api-key'],'only-key');body=JSON.parse(options.body);return {ok:true,json:async()=>({id:'session',connectUrl:'wss://connect.browserbase.com?sessionId=session'})};};
+ const session=await createRemoteSession('project',{apiKey:'only-key',contextId:'saved-context',request});assert.equal(session.id,'session');assert.deepEqual(body,{projectId:'project',browserSettings:{context:{id:'saved-context',persist:true}}});
+ await createRemoteSession('project',{apiKey:'only-key',request});assert.deepEqual(body,{projectId:'project'});
+ await assert.rejects(createRemoteSession('project',{}),/BROWSERBASE_API_KEY/);
+ await assert.rejects(createRemoteSession('project',{apiKey:'key',request:async()=>({ok:true,json:async()=>({id:'session',connectUrl:'wss://browserbase.com.evil.example'})})}),/Invalid Browserbase/);
+});
