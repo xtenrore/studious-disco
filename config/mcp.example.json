@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "browserbase": {"command": "mcp-server-browserbase", "args": [], "env": {"BROWSERBASE_API_KEY": "SET_IN_RAILWAY", "BROWSERBASE_PROJECT_ID": "SET_IN_RAILWAY", "GEMINI_API_KEY": "SET_IF_REQUIRED_BY_BROWSERBASE_TOOLS"}},
+    "github": {"serverUrl": "https://api.githubcopilot.com/mcp/", "headers": {"Authorization": "Bearer SET_GITHUB_TOKEN"}},
+    "railway": {"command": "railway", "args": ["mcp"]}
+  }
+}

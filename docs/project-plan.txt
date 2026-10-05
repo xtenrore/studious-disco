@@ -1,0 +1,864 @@
+Personal AGY on Railway — Project Plan
+
+Repository
+==========
+GitHub repository:
+https://github.com/xtenrore/studious-disco
+
+The repository currently starts empty and will become the single source of truth for the project.
+
+GitHub stores:
+- application source code
+- Dockerfiles
+- Railway deployment configuration
+- PWA code
+- web service code
+- workspace service code
+- terminal bridge
+- MCP configuration templates
+- documentation
+
+Railway runs the application from this GitHub repository.
+
+The intended deployment flow is:
+
+GitHub repository
+    |
+    | push to main
+    v
+Railway
+    |
+    +-- web service
+    |
+    +-- workspace service
+          |
+          +-- persistent Railway Volume
+
+
+PROJECT GOAL
+============
+
+Build a private, single-user web application hosted on Railway that acts as a mobile-first interface to one persistent AGY / Antigravity workspace.
+
+The application is intended only for one person and should feel like a dedicated AGY app when added to the iPhone Home Screen.
+
+It is not a multi-user AI platform, model router, watchdog, provider fallback system, or orchestration framework.
+
+Core idea:
+
+iPhone = interface
+GitHub = project source/version control
+Railway = persistent Linux computer and web host
+AGY = the only AI agent
+
+
+REPOSITORY STRUCTURE
+====================
+
+Recommended initial structure inside studious-disco:
+
+studious-disco/
+├── apps/
+│   ├── web/
+│   │   ├── PWA frontend
+│   │   ├── authentication
+│   │   ├── terminal UI
+│   │   ├── file UI
+│   │   ├── memory UI
+│   │   └── Browserbase live view
+│   │
+│   └── workspace/
+│       ├── workspace daemon
+│       ├── PTY / terminal bridge
+│       ├── AGY integration
+│       ├── file operations
+│       └── browser/MCP integration
+│
+├── docker/
+│   ├── web.Dockerfile
+│   └── workspace.Dockerfile
+│
+├── config/
+│   └── MCP configuration templates
+│
+├── docs/
+│   └── architecture and deployment notes
+│
+├── railway/
+│   └── Railway-related configuration where useful
+│
+├── .gitignore
+├── README.md
+└── package.json / workspace configuration as appropriate
+
+
+RAILWAY ARCHITECTURE
+====================
+
+Use one Railway project connected to:
+
+https://github.com/xtenrore/studious-disco
+
+Create two Railway services from the same repository.
+
+1. web
+------
+
+Publicly accessible service.
+
+Responsibilities:
+- PWA interface
+- /login
+- /
+- secure session cookies
+- authentication
+- terminal rendering
+- WebSocket gateway
+- file interface
+- memory interface
+- Browserbase live browser view
+- mobile/iPhone UX
+
+This is the only service that should have a public Railway/custom domain.
+
+2. workspace
+------------
+
+Private Railway service.
+
+Responsibilities:
+- Linux workspace
+- AGY / Antigravity CLI
+- tmux
+- Git
+- GitHub CLI
+- Railway CLI
+- Node.js
+- Python
+- MCP configuration
+- project repositories
+- AGY authentication state
+- AGY project/conversation state
+- PTY sessions
+
+It should communicate with the web service over Railway private networking.
+
+It should not expose a public internet endpoint.
+
+
+PERSISTENT RAILWAY VOLUME
+=========================
+
+Mount a Railway Volume to the AGY user's real home directory.
+
+Recommended location:
+
+/home/agy/
+
+Example contents:
+
+/home/agy/
+├── .config/
+├── .gemini/
+├── .local/
+├── .ssh/
+├── .gitconfig
+├── projects/
+└── memory/
+
+The volume should preserve:
+- cloned Git repositories
+- AGY state
+- AGY conversations
+- authentication state where supported
+- MCP configuration
+- project memory
+- user files
+- shell configuration
+
+A normal Railway redeploy should not erase the user's workspace files.
+
+
+GITHUB + RAILWAY DEPLOYMENT MODEL
+=================================
+
+GitHub is the source of truth.
+
+Railway should deploy from the GitHub repository.
+
+Normal update flow:
+
+1. code changes are committed to studious-disco
+2. changes are pushed to GitHub
+3. Railway builds the affected service
+4. Railway deploys it
+5. persistent workspace data remains on the Railway Volume
+
+Application source should not be manually edited inside a production Railway container as the normal development method.
+
+The running AGY workspace may clone and modify other repositories under:
+
+/home/agy/projects/
+
+Those project repositories are separate from the studious-disco app source.
+
+
+AGY BEHAVIOR
+============
+
+AGY must remain the real and only AI agent.
+
+The application must not place another AI agent or supervisor in front of AGY.
+
+The application must not generate or insert:
+- hidden system prompts
+- hidden developer prompts
+- automatic project instructions
+- automatic memory prompts
+- automatic "continue" messages
+- retry prompts
+- recovery prompts
+- model fallback prompts
+
+Only text explicitly entered and submitted by the user should be sent to AGY.
+
+If AGY:
+- reaches a usage limit
+- exits
+- stops
+- crashes
+- returns to the shell
+
+the application leaves it alone.
+
+There is no watchdog.
+
+There is no automatic relaunch.
+
+There is no provider switching.
+
+There is no quota workaround.
+
+
+TMUX / TERMINAL PERSISTENCE
+===========================
+
+Use tmux only to preserve the terminal session when the iPhone disconnects.
+
+Example:
+
+tmux
+└── agy-main
+    └── AGY
+
+Behavior:
+
+Open PWA
+→ attach to existing tmux session
+
+Close PWA / lock phone
+→ browser disconnects
+→ tmux session remains
+
+Open PWA later
+→ reconnect to same tmux session
+
+If AGY exits, the shell stays visible.
+
+The application must not automatically run AGY again.
+
+
+APPLICATION ROUTES
+==================
+
+User-facing navigation should stay extremely simple.
+
+Only:
+
+/login
+/
+
+should normally appear to the user.
+
+/login
+------
+
+Shown only when the user is logged out.
+
+/
+-
+
+Everything else happens inside this one application shell:
+- AGY
+- Files
+- Browser
+- Memory
+- Settings
+
+Switching tabs must not redirect to different visible pages.
+
+Backend APIs may internally use endpoints such as:
+
+/api/*
+/ws/*
+
+but they are not user navigation routes.
+
+
+PWA REQUIREMENTS
+================
+
+The application must work properly when added to the iPhone Home Screen.
+
+Recommended manifest behavior:
+
+start_url: "/"
+scope: "/"
+display: "standalone"
+
+Requirements:
+- full-screen standalone appearance
+- no unnecessary Safari chrome
+- safe-area support
+- Dynamic Island spacing
+- home-indicator spacing
+- touch-friendly layout
+- virtual keyboard resizing
+- landscape support
+- terminal reconnect after iOS suspension
+- no route changes when switching app sections
+
+
+AUTHENTICATION
+==============
+
+Single-user only.
+
+Do not implement:
+- signup
+- registration
+- teams
+- organizations
+- invitations
+- billing
+- subscriptions
+- public accounts
+
+/login should contain a simple password login.
+
+Store only an Argon2id password hash.
+
+Successful login creates a persistent secure server session cookie.
+
+Cookie requirements:
+- HttpOnly
+- Secure
+- appropriate SameSite protection
+
+The user should remain signed in across normal Home Screen launches.
+
+The workspace terminal and WebSocket endpoints must require authentication.
+
+
+MAIN INTERFACE
+==============
+
+The application should remain simple.
+
+Main sections:
+- AGY
+- Files
+- Browser
+- Memory
+- Settings
+
+All sections render within /.
+
+The AGY section should show the real terminal output rather than a fake recreated chat UI.
+
+
+TERMINAL
+========
+
+Use a mature browser terminal renderer such as xterm.js.
+
+The terminal must support:
+- ANSI formatting
+- bold output
+- colors
+- scrolling
+- selection
+- copy
+- paste
+- multiline input
+- large pasted prompts
+- Unicode
+- code
+- terminal resizing
+- clickable links
+
+AGY's output should be displayed as AGY produced it.
+
+The application should not rewrite AGY messages.
+
+
+PASTING / CLIPBOARD
+===================
+
+Pasting from iPhone must be reliable.
+
+Provide a mobile terminal toolbar with controls such as:
+
+Paste
+Copy
+Ctrl
+Esc
+Tab
+Up
+Down
+Left
+Right
+
+The paste system must support:
+- short text
+- very large text
+- multiline prompts
+- code
+- indentation
+- Unicode
+
+It must not:
+- duplicate characters
+- lose line breaks
+- auto-submit halfway through
+- corrupt indentation
+- freeze the terminal
+
+Native iOS copy/paste should also work wherever possible.
+
+
+CLICKABLE LINKS
+===============
+
+URLs printed in the AGY terminal must be tappable.
+
+Examples:
+- Google authentication links
+- GitHub links
+- Railway links
+- Browserbase links
+- OAuth/device-login links
+- normal HTTPS links
+
+The terminal should recognize URLs without changing AGY's original output.
+
+
+AGY AUTHENTICATION
+==================
+
+AGY should use its normal authentication flow.
+
+If AGY prints a login URL or device code:
+
+1. the URL must be tappable
+2. the user opens it
+3. the user completes login
+4. the user returns to the PWA
+5. any required code can be pasted/entered
+6. the same terminal session continues
+
+The application must not replace AGY's own authentication mechanism.
+
+
+PROJECTS
+========
+
+Projects should normally live at:
+
+/home/agy/projects/
+
+Example:
+
+/home/agy/projects/
+├── Plane-Alerts/
+├── A.K.M.P/
+└── other-project/
+
+AGY should work on normal Git repositories in these folders.
+
+The app should not invent a proprietary project format.
+
+
+PROJECT MEMORY
+==============
+
+Preserve AGY's native project/conversation state.
+
+Additionally, allow optional plain-text project memory.
+
+Example:
+
+/home/agy/projects/Plane-Alerts/.private-memory/
+├── notes.md
+├── decisions.md
+└── handoff.md
+
+The PWA may provide a Memory section for viewing/editing these files.
+
+Important:
+
+Memory files must NOT automatically be injected into AGY prompts.
+
+The user decides when AGY reads them.
+
+Example user instruction:
+
+Read .private-memory/handoff.md and continue.
+
+This preserves the rule that only the user prompts AGY.
+
+
+FILES
+=====
+
+Provide a mobile file interface.
+
+Capabilities:
+- browse
+- open
+- edit text files
+- create files
+- create folders
+- rename
+- delete with confirmation
+- upload
+- download
+- search
+- syntax highlighting
+
+Files remain real files inside the Railway workspace.
+
+
+CLOUD BROWSER
+=============
+
+Do not build a homemade Chromium/Playwright browser service on Railway.
+
+Use a proper managed cloud browser provider.
+
+Preferred provider:
+
+Browserbase
+
+Architecture:
+
+AGY
+ |
+ | MCP
+ v
+Browserbase
+ |
+ v
+Managed cloud Chromium
+
+AGY should be able to:
+- open websites
+- navigate
+- click
+- type
+- fill forms
+- read pages
+- take screenshots
+- use authenticated browser sessions
+- use persistent browser contexts where appropriate
+
+
+BROWSER LIVE VIEW
+=================
+
+The Browser section should expose the live Browserbase browser session inside the PWA.
+
+The user should be able to:
+- watch AGY browse
+- see the current page
+- take over manually
+- enter credentials
+- complete 2FA
+- handle CAPTCHA when required
+- approve sensitive actions
+- return control to AGY
+
+
+MCPs
+====
+
+Start with a small, useful MCP set.
+
+1. Browserbase MCP
+- cloud browser
+- web navigation
+- screenshots
+- page interaction
+
+2. GitHub MCP
+- repositories
+- issues
+- pull requests
+- Actions
+- commits
+- repository information
+
+3. Railway MCP
+- Railway projects
+- deployments
+- services
+- logs
+- environments
+
+Avoid installing a large number of unnecessary MCPs.
+
+Additional MCPs should only be added when they have a clear purpose.
+
+
+GIT
+===
+
+The workspace should contain:
+- git
+- GitHub CLI
+- GitHub MCP
+
+Normal repositories should remain normal Git repositories.
+
+The application itself should not interfere with AGY's Git operations.
+
+
+NO WATCHDOG
+===========
+
+This is a strict design requirement.
+
+Do not implement:
+- automatic AGY restarts
+- health logic that relaunches AGY
+- automatic task continuation
+- generated follow-up prompts
+- fallback AI providers
+- provider rotation
+- automatic quota handling
+- hidden commands
+- automatic approval systems
+- a second supervising AI agent
+
+Infrastructure monitoring may determine whether the web/workspace service itself is reachable, but it must not control AGY's behavior.
+
+
+USAGE LIMITS
+============
+
+AGY's own limits remain untouched.
+
+When a usage limit is reached:
+
+AGY
+→ reports limit
+→ stops/blocks as AGY normally does
+
+The application does nothing.
+
+Do not implement:
+- quota estimators
+- provider fallback
+- key rotation
+- retry timers
+- automatic waiting
+- usage bypassing
+
+
+SECRETS
+-------
+
+Production secrets should be stored in Railway environment variables/secrets.
+
+Examples may include:
+- application session secret
+- password hash
+- Browserbase credentials
+- MCP-related credentials where needed
+
+Do not commit secret values to GitHub.
+
+The GitHub repository should contain:
+- variable names
+- examples/templates
+- documentation
+
+but never production secret values.
+
+
+SECURITY
+========
+
+Requirements:
+- workspace service stays private
+- HTTPS only
+- authenticated WebSocket connections
+- strong session secret
+- Argon2id password hashing
+- HttpOnly session cookie
+- Secure cookie
+- CSRF protection where appropriate
+- no public registration
+- no public terminal endpoint
+- Browserbase credentials remain server-side
+- MCP credentials remain server-side
+- secret values never returned to the client unnecessarily
+
+
+RAILWAY SERVICE SETTINGS
+========================
+
+web
+---
+Source:
+xtenrore/studious-disco
+
+Public networking:
+enabled
+
+Persistent volume:
+not normally required for application code
+
+workspace
+---------
+Source:
+xtenrore/studious-disco
+
+Public networking:
+disabled
+
+Railway private networking:
+enabled
+
+Persistent volume:
+mounted to /home/agy
+
+The workspace should not use a serverless/sleep configuration that would intentionally stop long-running AGY work while it is active.
+
+
+MOBILE RELIABILITY TESTS
+========================
+
+Before considering the project complete, test it specifically on iPhone.
+
+Authentication:
+- cold launch
+- login
+- persistent login
+- expired session
+
+Terminal:
+- AGY startup
+- attach
+- disconnect/reconnect
+- scrollback
+- large output
+- resize
+- landscape mode
+
+Clipboard:
+- short paste
+- huge paste
+- multiline paste
+- code paste
+- Unicode paste
+- copy from terminal
+
+Links:
+- Google login URL
+- GitHub URL
+- Railway URL
+- generic HTTPS URL
+
+iOS:
+- lock phone
+- unlock phone
+- switch apps
+- background the PWA
+- return after an extended period
+- switch Wi-Fi/cellular
+- rotate display
+- repeatedly open/close keyboard
+
+Cloud browser:
+- AGY starts browser
+- live view appears
+- navigation works
+- click/type works
+- user takeover works
+- login/2FA works
+- control can return to AGY
+
+Persistence:
+- redeploy web
+- files survive
+- AGY project state survives
+- Railway Volume survives
+- terminal reconnect works when the workspace process itself has not restarted
+
+
+OUT OF SCOPE
+============
+
+Do not include:
+- multiple AI providers
+- model selector
+- custom AI backend
+- AI router
+- automatic fallback
+- billing
+- subscriptions
+- teams
+- organizations
+- public signup
+- watchdog
+- hidden AGY prompts
+- automatic task recovery
+- homemade cloud browser
+- fake AGY reasoning UI
+- quota bypass
+- automatic API key rotation
+
+
+FINAL PRODUCT
+=============
+
+The finished product should feel like a private AGY application installed on the user's iPhone.
+
+Opening the Home Screen icon should normally go directly to:
+
+/
+
+From there the user can access:
+- AGY
+- terminal
+- files
+- project memory
+- Browserbase cloud browser
+- GitHub through AGY/MCP
+- Railway through AGY/MCP
+
+The visible app remains on / except when authentication requires /login.
+
+GitHub repository:
+https://github.com/xtenrore/studious-disco
+
+GitHub stores and versions the application.
+
+Railway builds and runs the application.
+
+The Railway Volume stores the persistent AGY workspace.
+
+The iPhone acts as the screen and keyboard.
+
+AGY remains the only AI agent and is never silently prompted, restarted, supervised, or routed by the surrounding application.

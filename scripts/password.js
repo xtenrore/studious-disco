@@ -1,0 +1,10 @@
+import argon2 from 'argon2';
+import { Writable } from 'node:stream';
+import readline from 'node:readline/promises';
+let muted=false;
+const output=new Writable({write(chunk,encoding,callback){if(!muted)process.stdout.write(chunk,encoding);callback();}});
+const rl=readline.createInterface({input:process.stdin,output,terminal:process.stdin.isTTY});
+process.stdout.write('Password (input hidden): ');muted=true;
+const password=await rl.question('');muted=false;rl.close();process.stdout.write('\n');
+if(!password)throw new Error('Password cannot be empty');
+console.log(await argon2.hash(password,{type:argon2.argon2id,memoryCost:65536,timeCost:3,parallelism:1}));

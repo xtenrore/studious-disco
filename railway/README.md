@@ -1,0 +1,1 @@
+Railway's service-level TOML configuration is deprecated. This project uses the two Dockerfiles and explicit service settings, with the equivalent project graph in `.railway/railway.ts`. No secret values are versioned. Pull and plan against the live project before applying the IaC graph; preserve any newly added server variables.
