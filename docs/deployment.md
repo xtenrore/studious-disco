@@ -35,7 +35,7 @@ Never commit secrets, print them in build logs, or pass application production s
 
 ## Redeploy and backup
 
-A normal GitHub push deploys services matched by their watch patterns. The volume survives redeploys. Web redeploys temporarily disconnect the gateway but tmux continues in workspace. Workspace redeploys end running AGY and tmux processes; the application never restores or relaunches them. On your next terminal attach, a new shell is created.
+When Railway’s GitHub integration is connected, pushes deploy services matched by their watch patterns. The current CLI-upload deployment uses the update flow below. The volume survives redeploys. Web redeploys temporarily disconnect the gateway but tmux continues in workspace. Workspace redeploys end running AGY and tmux processes; the application never restores or relaunches them. On your next terminal attach, a new shell is created.
 
 Enable Railway volume backups appropriate for your files and back up irreplaceable work separately. Do not detach or delete the home volume when updating service configuration.
 

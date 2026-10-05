@@ -28,7 +28,7 @@ See [deployment](docs/deployment.md) for the two-service settings, variables, pe
 
 - `web`: public domain, `docker/web.Dockerfile`.
 - `workspace`: private network only, `docker/workspace.Dockerfile`, volume at `/home/agy`, sleeping disabled.
-- Both sources follow `main` in this repository.
+- This deployment uses Railway CLI uploads of GitHub ZIPs. Repeat that flow for updates; deploy-on-push requires granting the Railway GitHub integration repository access.
 
 The workspace image includes the official Google Antigravity CLI, tmux, Git, GitHub CLI, Railway CLI, Node.js and Python. AGY's login and approval flow is untouched. Complete its login yourself in the terminal.
 
