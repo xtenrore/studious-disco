@@ -11,7 +11,7 @@ export default defineRailway(() => {
     build: { builder: 'DOCKERFILE', dockerfilePath: 'docker/workspace.Dockerfile' },
     deploy: { sleepApplication: false, restartPolicyType: 'ON_FAILURE', restartPolicyMaxRetries: 3 },
     volumeMounts: { '/home/agy': home },
-    env: { PORT: '3001', NODE_ENV: 'production', WORKSPACE_TOKEN: preserve() },
+    env: { PORT: '3001', NODE_ENV: 'production', WORKSPACE_TOKEN: preserve(), BROWSERBASE_API_KEY: '${{shared.BROWSERBASE_API_KEY}}' },
   });
   const web = service('web', {
     source: github('xtenrore/studious-disco', { branch: 'main' }),
