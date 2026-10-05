@@ -7,3 +7,5 @@ apps/web/dist/
 playwright-report/
 test-results/
 .secrets/
+
+docs/screenshots/
