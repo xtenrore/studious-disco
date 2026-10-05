@@ -23,6 +23,29 @@ try{
    await page.goto(origin);await page.waitForURL('**/login');await page.screenshot({path:`docs/screenshots/${name}-login.png`,fullPage:true});
    await page.getByLabel('Workspace password').fill('browser-test-password');await page.getByRole('button',{name:'Open workspace'}).click();await page.waitForURL(origin+'/');await page.getByText('Connected',{exact:true}).waitFor();await page.waitForTimeout(500);
    await page.screenshot({path:`docs/screenshots/${name}-terminal.png`,fullPage:true});
+   // Exercise real tmux history while the application owns the alternate screen.
+   await page.locator('.xterm-helper-textarea').focus();
+   await page.keyboard.type("for n in $(seq 1 150); do printf 'history line %s\\n' \"$n\"; done");
+   await page.keyboard.press('Enter');await page.waitForTimeout(600);
+   const screen=page.locator('.xterm-rows');assert.ok((await screen.innerText()).includes('history line 150'));
+   await page.getByRole('button',{name:'Page up',exact:true}).click();await page.waitForTimeout(300);
+   assert.ok(!(await screen.innerText()).includes('history line 150'),'Page up should reveal earlier tmux output');
+   await page.getByRole('button',{name:'Live',exact:true}).click();await page.waitForTimeout(300);
+   assert.ok((await screen.innerText()).includes('history line 150'),'Live should return to the active terminal');
+   if(name!=='desktop'){
+    await page.locator('.terminal-panel > .terminal').evaluate(element=>{
+     const dispatch=(type,y)=>{const event=new Event(type,{bubbles:true,cancelable:true});Object.defineProperty(event,'touches',{value:y===null?[]:[{clientX:120,clientY:y}]});element.dispatchEvent(event);};
+     dispatch('touchstart',200);dispatch('touchmove',380);dispatch('touchend',null);
+    });await page.waitForTimeout(350);
+    assert.ok(!(await screen.innerText()).includes('history line 150'),'Swipe should reveal earlier output');
+   }else{
+    await page.locator('.terminal-panel > .terminal').hover();await page.mouse.wheel(0,-450);await page.waitForTimeout(350);
+    assert.ok(!(await screen.innerText()).includes('history line 150'),'Wheel should reveal earlier output');
+   }
+   await page.getByRole('button',{name:'Page down',exact:true}).click();await page.waitForTimeout(350);
+   await page.getByRole('button',{name:'Live',exact:true}).click();await page.waitForTimeout(350);
+   assert.ok((await screen.innerText()).includes('history line 150'));
+
    const navigation=page.getByRole('navigation',{name:name==='desktop'?'Main navigation':'Mobile navigation',exact:true});
    await navigation.getByRole('button',{name:'Files',exact:true}).click();await page.getByRole('button',{name:'demo-project',exact:false}).first().click();await page.getByRole('button',{name:'hello.md',exact:false}).first().click();await page.locator('.cm-content').waitFor();assert.ok((await page.locator('.cm-content').innerText()).includes('Unicode: 🌍 日本語'));
    await page.screenshot({path:`docs/screenshots/${name}-files.png`,fullPage:true});

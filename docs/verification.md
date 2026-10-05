@@ -20,3 +20,10 @@ Production deployment verified on 2026-10-05 at https://web-production-66e90.up.
 - The live HTTPS app passed iPhone-sized Chromium and WebKit login, authenticated terminal, tab navigation, persistent login after reload, overflow, JavaScript-error and logout checks.
 
 Verification did not launch AGY. Provider authentication and physical iPhone acceptance remain owner-run checks.
+
+Terminal scrolling update prepared on 2026-10-05:
+
+- Swipe and wheel scrolling, Page up / Page down, and Live controls use client scrollback or native tmux copy mode for full-screen programs.
+- Real tmux browser checks passed for history paging, returning to the live screen, wheel input in desktop Chromium, and synthetic swipe input in iPhone-sized Chromium and WebKit.
+- Vite build passed. This update changes only web assets and browser checks; the workspace service must not be redeployed while the owner uses AGY.
+- Requested release window: 2026-10-05 22:00 GMT+3 (19:00 UTC). Deploy only the web service using the immutable GitHub ZIP and Railway CLI.
