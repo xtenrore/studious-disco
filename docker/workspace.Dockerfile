@@ -16,7 +16,7 @@ COPY apps/shared ./apps/shared
 COPY scripts/browserbase-project.js ./scripts/browserbase-project.js
 COPY scripts/configure-mcp.sh /usr/local/bin/configure-agy-mcp
 COPY docker/workspace-entrypoint.sh /usr/local/bin/workspace-entrypoint
-RUN chmod 755 /usr/local/bin/configure-agy-mcp /usr/local/bin/workspace-entrypoint
+RUN chmod 755 /usr/local/bin/configure-agy-mcp /usr/local/bin/workspace-entrypoint && chmod -R a+rX /app
 EXPOSE 3001
 ENTRYPOINT ["workspace-entrypoint"]
 CMD ["node", "apps/workspace/server.js"]

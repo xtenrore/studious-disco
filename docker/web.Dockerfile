@@ -14,6 +14,7 @@ COPY --from=build /app/package.json ./package.json
 COPY --from=build /app/apps/web/server.js ./apps/web/server.js
 COPY --from=build /app/apps/shared ./apps/shared
 COPY --from=build /app/apps/web/dist ./apps/web/dist
+RUN chmod -R a+rX /app
 USER node
 EXPOSE 3000
 CMD ["node", "apps/web/server.js"]
