@@ -40,3 +40,14 @@ A normal GitHub push deploys services matched by their watch patterns. The volum
 Enable Railway volume backups appropriate for your files and back up irreplaceable work separately. Do not detach or delete the home volume when updating service configuration.
 
 Deployments are considered successful only after both services report SUCCESS and the public domain passes authenticated smoke checks. Physical-iPhone suspension, clipboard, keyboard and live-provider tests remain required; see `mobile-testing.md`.
+
+## CLI upload when GitHub integration is unavailable
+
+Download and extract the public `main` ZIP, sign in with `railway login`, and upload the same repository root to each existing service:
+
+```sh
+railway up --project 8322787a-78be-4819-9837-353369b59d2a --environment b5248052-cf85-4538-a969-470eae1e7c2e --service workspace --detach -m "Deploy workspace from GitHub ZIP"
+railway up --project 8322787a-78be-4819-9837-353369b59d2a --environment b5248052-cf85-4538-a969-470eae1e7c2e --service web --detach -m "Deploy web from GitHub ZIP"
+```
+
+Poll deployment status until both report SUCCESS. These uploads do not enable deploy-on-push. For subsequent releases, repeat the ZIP/CLI upload flow, or grant the Railway GitHub app repository access and connect the services to `main`. Existing secrets and the home volume remain attached.

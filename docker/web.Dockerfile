@@ -3,7 +3,7 @@ FROM node:22-bookworm-slim AS build
 WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends python3 make g++ && rm -rf /var/lib/apt/lists/*
 COPY package*.json ./
-RUN --mount=type=secret,id=build_ca if [ -f /run/secrets/build_ca ]; then export CURL_CA_BUNDLE=/run/secrets/build_ca; export NODE_EXTRA_CA_CERTS=/run/secrets/build_ca; fi; npm ci
+RUN npm ci
 COPY . .
 RUN npm run build && npm prune --omit=dev
 FROM node:22-bookworm-slim
