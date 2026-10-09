@@ -31,5 +31,15 @@ RUN if [ -f /opt/antigravity/Antigravity-x64/chrome-sandbox ]; then \
     > /etc/xdg/autostart/antigravity-poc.desktop \
  && cp /etc/xdg/autostart/antigravity-poc.desktop /usr/share/applications/antigravity-poc.desktop
 
+
+# Official Antigravity CLI; install system-wide so XFCE's terminal can run "agy".
+# Google's bootstrapper checks the downloaded binary against its SHA-512 manifest.
+RUN curl -fsSL --retry 3 --max-time 60 \
+    "https://antigravity.google/cli/install.sh" -o /tmp/install-agy-cli.sh \
+ && bash /tmp/install-agy-cli.sh --dir /usr/local/bin \
+ && test -x /usr/local/bin/agy \
+ && /usr/local/bin/agy --version \
+ && rm -f /tmp/install-agy-cli.sh
+
 EXPOSE 3000
 VOLUME /config
