@@ -34,3 +34,7 @@ jobs:
           push: true
           tags: ghcr.io/xtenrore/antigravity-mobile-poc:latest
           labels: org.opencontainers.image.source=https://github.com/xtenrore/studious-disco
+
+      - name: Check desktop binary dependencies
+        run: |
+          docker run --rm --entrypoint /bin/bash ghcr.io/xtenrore/antigravity-mobile-poc:latest -c 'test -x /opt/antigravity/Antigravity-x64/antigravity && ldd /opt/antigravity/Antigravity-x64/antigravity | tee /tmp/antigravity-deps && ! grep "not found" /tmp/antigravity-deps'
